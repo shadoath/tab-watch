@@ -155,6 +155,20 @@ function renderTabs(tabData, sortBy, dir, query) {
       window.close();
     });
 
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "close-btn";
+    closeBtn.title = "Close tab";
+    closeBtn.textContent = "×";
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      chrome.tabs.remove(tabId);
+      item.remove();
+      durationEls.delete(tabId);
+      const idx = tabData.findIndex((t) => t.tabId === tabId);
+      if (idx !== -1) tabData.splice(idx, 1);
+    });
+    item.appendChild(closeBtn);
+
     list.appendChild(item);
 
     if (hasTimestamp) {
