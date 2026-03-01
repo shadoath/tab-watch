@@ -31,6 +31,24 @@ function startTicker() {
   tickInterval = setInterval(tick, (opts.opt_refresh_interval ?? 5) * 1000);
 }
 
+// ── Keyboard navigation ──────────────────────────────────────────────────────
+
+let focusedIndex = -1;
+
+function getVisibleItems() {
+  return Array.from(document.querySelectorAll("#tab-list .tab-item"));
+}
+
+function setFocus(index) {
+  const items = getVisibleItems();
+  if (!items.length) return;
+  focusedIndex = Math.max(0, Math.min(items.length - 1, index));
+  items.forEach((item, i) => item.classList.toggle("focused", i === focusedIndex));
+  items[focusedIndex].scrollIntoView({ block: "nearest" });
+}
+
+// ── Formatting ───────────────────────────────────────────────────────────────
+
 function formatDuration(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const seconds = totalSeconds % 60;
@@ -72,6 +90,7 @@ function updateColHeaders(sortBy, dir) {
 }
 
 function renderTabs(tabData, sortBy, dir, query) {
+  focusedIndex = -1;
   const list = document.getElementById("tab-list");
   list.innerHTML = "";
 
@@ -227,10 +246,43 @@ async function init() {
   startTicker();
 
   const search = document.getElementById("search");
+
   search.addEventListener("input", () => {
     currentQuery = search.value.trim().toLowerCase();
     renderTabs(tabData, currentSort, currentDir, currentQuery);
   });
+
+  search.addEventListener("keydown", (e) => {
+    const items = getVisibleItems();
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setFocus(focusedIndex < 0 ? 0 : focusedIndex + 1);
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setFocus(focusedIndex <= 0 ? 0 : focusedIndex - 1);
+        break;
+      case "Enter":
+        if (focusedIndex >= 0) {
+          e.preventDefault();
+          items[focusedIndex]?.click();
+        }
+        break;
+      case "Escape":
+        window.close();
+        break;
+      default: {
+        const num = parseInt(e.key, 10);
+        if (num >= 1 && num <= 5 && search.value === "") {
+          e.preventDefault();
+          items[num - 1]?.click();
+        }
+      }
+    }
+  });
+
   search.focus();
 
   document.querySelectorAll(".col-hd").forEach((col) => {
