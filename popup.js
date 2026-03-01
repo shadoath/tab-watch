@@ -122,10 +122,15 @@ function renderTabs(tabData, sortBy, dir, query) {
 
   durationEls.clear();
 
-  filtered.forEach(({ tabId, windowId, title, hostname, favicon, hasTimestamp, group, isStale, timestamp, visits }, index) => {
+  filtered.forEach(({ tabId, windowId, title, hostname, favIconUrl, hasTimestamp, group, isStale, timestamp, visits }, index) => {
     const duration = hasTimestamp ? formatDuration(Date.now() - timestamp) : null;
     const item = document.createElement("div");
     item.className = "tab-item";
+
+    const faviconEl = favIconUrl ? Object.assign(document.createElement("img"), {
+      className: "favicon", src: favIconUrl, alt: "",
+    }) : Object.assign(document.createElement("div"), { className: "favicon-placeholder" });
+    if (favIconUrl) faviconEl.onerror = () => faviconEl.replaceWith(Object.assign(document.createElement("div"), { className: "favicon-placeholder" }));
 
     if (isStale) item.classList.add("stale");
 
@@ -145,7 +150,6 @@ function renderTabs(tabData, sortBy, dir, query) {
       : "";
 
     item.innerHTML = `
-      ${favicon}
       <div class="tab-info">
         <div class="tab-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
         <div class="tab-url">${escapeHtml(hostname)}${visitLabel}</div>
@@ -156,6 +160,7 @@ function renderTabs(tabData, sortBy, dir, query) {
         ${hasTimestamp ? duration : "—"}
       </div>
     `;
+    item.prepend(faviconEl);
 
     item.addEventListener("click", () => {
       chrome.tabs.update(tabId, { active: true });
@@ -225,15 +230,10 @@ async function init() {
   });
 
   // Resolve options with defaults
-  opts = {
-    opt_badge:            storage.opt_badge            !== false,
-    opt_groups:           storage.opt_groups           !== false,
-    opt_warn:             storage.opt_warn             !== false,
-    opt_warn_days:        storage.opt_warn_days        ?? 7,
-    opt_animations:       storage.opt_animations       !== false,
-    opt_refresh:          storage.opt_refresh          !== false,
-    opt_refresh_interval: storage.opt_refresh_interval ?? 5,
-  };
+  opts = {};
+  for (const [key, def] of Object.entries(DEFAULTS)) {
+    opts[key] = storage[key] !== undefined ? storage[key] : def;
+  }
 
   // Build groups lookup map
   const groups = {};
@@ -265,9 +265,7 @@ async function init() {
       visits,
       group,
       isStale,
-      favicon: tab.favIconUrl
-        ? `<img class="favicon" src="${tab.favIconUrl}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'favicon-placeholder'}))">`
-        : `<div class="favicon-placeholder"></div>`,
+      favIconUrl: tab.favIconUrl || null,
     };
   });
 
@@ -318,6 +316,19 @@ async function init() {
   });
 
   search.focus();
+
+  // Live option sync — pick up changes saved in the options page
+  chrome.storage.onChanged.addListener((changes) => {
+    let needsRender = false;
+    for (const [key, { newValue }] of Object.entries(changes)) {
+      if (key === "theme") { applyTheme(newValue === "light"); continue; }
+      if (!(key in opts)) continue;
+      opts[key] = newValue;
+      if (key === "opt_refresh" || key === "opt_refresh_interval") startTicker();
+      else needsRender = true;
+    }
+    if (needsRender) renderTabs(tabData, currentSort, currentDir, currentQuery);
+  });
 
   document.querySelectorAll(".col-hd").forEach((col) => {
     col.addEventListener("click", () => {

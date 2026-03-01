@@ -1,13 +1,3 @@
-const DEFAULTS = {
-  opt_badge:            true,
-  opt_groups:           true,
-  opt_warn:             true,
-  opt_warn_days:        7,
-  opt_animations:       true,
-  opt_refresh:          true,
-  opt_refresh_interval: 5,
-};
-
 let savedTimer = null;
 
 function showSaved() {
@@ -30,8 +20,21 @@ async function init() {
     chrome.storage.local.get(null, resolve)
   );
 
-  // Apply theme
-  if (storage.theme === "light") document.body.classList.add("light");
+  // Apply theme and wire toggle
+  function applyTheme(isLight) {
+    document.body.classList.toggle("light", isLight);
+    const toggle = document.getElementById("theme-toggle");
+    toggle.querySelector(".icon").textContent = isLight ? "☽" : "☀";
+    toggle.querySelector(".label").textContent = isLight ? "Dark" : "Light";
+  }
+
+  applyTheme(storage.theme === "light");
+
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const nowLight = !document.body.classList.contains("light");
+    applyTheme(nowLight);
+    chrome.storage.local.set({ theme: nowLight ? "light" : "dark" });
+  });
 
   // Show extension version
   document.getElementById("version").textContent =
@@ -83,6 +86,18 @@ async function init() {
       chrome.storage.local.set({ opt_warn_days: val });
       showSaved();
     }, 600);
+  });
+
+  // Clear tab history (timestamps + visit counts)
+  document.getElementById("clear-storage").addEventListener("click", async () => {
+    const items = await new Promise((resolve) => chrome.storage.local.get(null, resolve));
+    const keysToRemove = Object.keys(items).filter(
+      (k) => /^\d+_/.test(k) || k.startsWith("v:")
+    );
+    if (keysToRemove.length > 0) {
+      await new Promise((resolve) => chrome.storage.local.remove(keysToRemove, resolve));
+    }
+    showSaved();
   });
 }
 

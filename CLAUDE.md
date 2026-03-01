@@ -8,8 +8,11 @@ Instructions for Claude Code when working on this project.
 tab-timer/
 ├── manifest.json       # Extension manifest (MV3)
 ├── background.js       # Service worker — tracks tab open timestamps
+├── defaults.js         # Shared DEFAULTS object (loaded by popup.html + options.html)
 ├── popup.html          # Popup UI + all CSS (inline, no external stylesheet)
 ├── popup.js            # Popup logic — rendering, search, sort, theme, navigation
+├── options.html        # Settings page
+├── options.js          # Settings page logic
 ├── icons/
 │   ├── icon.svg        # Source icon — edit this, then regenerate PNGs
 │   ├── icon16.png
