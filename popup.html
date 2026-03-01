@@ -285,35 +285,33 @@
 
       .close-btn {
         position: absolute;
-        right: 12px;
+        right: 10px;
         top: 50%;
         transform: translateY(-50%);
-        opacity: 0;
-        pointer-events: none;
-        width: 20px;
-        height: 20px;
+        visibility: hidden;
+        width: 26px;
+        height: 26px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: none;
         background: none;
-        border-radius: 4px;
-        font-size: 15px;
+        border-radius: 5px;
+        font-size: 18px;
         line-height: 1;
-        color: var(--text-url);
+        color: var(--text-title);
         cursor: pointer;
         padding: 0;
-        transition: opacity 0.15s, background 0.1s, color 0.1s;
+        transition: background 0.1s, color 0.1s;
       }
 
       .tab-item:hover .close-btn {
-        opacity: 1;
-        pointer-events: auto;
+        visibility: visible;
       }
 
       .close-btn:hover {
-        background: rgba(220, 60, 60, 0.15);
-        color: #e05555;
+        background: rgba(220, 40, 40, 0.35);
+        color: #ff2222;
       }
 
       /* ── Duration ── */
