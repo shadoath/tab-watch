@@ -252,7 +252,7 @@ async function init() {
     const group = (opts.opt_groups && tab.groupId > 0) ? groups[tab.groupId] ?? null : null;
     const isStale = opts.opt_warn && hasTimestamp && (now - timestamp) > warnMs;
 
-    const visits = storage[`visits_${tab.id}_${tab.url}`] || 0;
+    const visits = storage[`v:${tab.url}`] || 0;
 
     return {
       tabId: tab.id,

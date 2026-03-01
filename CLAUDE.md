@@ -33,10 +33,12 @@ tab-timer/
 
 `chrome.storage.local` keys:
 
-| Key | Value | Set by |
-|---|---|---|
-| `{tabId}_{url}` | `timestamp (ms)` | `background.js` on `tabs.onUpdated` |
-| `theme` | `"light"` or `"dark"` | `popup.js` on toggle click |
+| Key | Value | Set by | Lifetime |
+|---|---|---|---|
+| `{tabId}_{url}` | `timestamp (ms)` | `background.js` on `tabs.onUpdated` | Deleted when tab closes or navigates away |
+| `v:{url}` | visit count | `background.js` on `tabs.onActivated` | Persists across tab close/reopen |
+| `theme` | `"light"` or `"dark"` | `popup.js` / `options.js` | Permanent |
+| `opt_*` | option values | `options.js` | Permanent |
 
 ## Icons
 

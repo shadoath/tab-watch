@@ -19,6 +19,21 @@ chrome.tabs.onRemoved.addListener(updateBadge);
 chrome.runtime.onInstalled.addListener(updateBadge);
 chrome.runtime.onStartup.addListener(updateBadge);
 
+// ── Garbage collection on startup ────────────────────────────────────────────
+
+chrome.runtime.onStartup.addListener(async () => {
+  const [tabs, items] = await Promise.all([
+    chrome.tabs.query({}),
+    chrome.storage.local.get(null),
+  ]);
+  const activeIds = new Set(tabs.map((t) => String(t.id)));
+  const keysToRemove = Object.keys(items).filter((k) => {
+    const match = k.match(/^(\d+)_/);
+    return match && !activeIds.has(match[1]);
+  });
+  if (keysToRemove.length > 0) chrome.storage.local.remove(keysToRemove);
+});
+
 chrome.storage.onChanged.addListener((changes) => {
   if ("opt_badge" in changes) updateBadge();
 });
@@ -29,7 +44,7 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   try {
     const tab = await chrome.tabs.get(tabId);
     if (!tab.url) return;
-    const key = `visits_${tabId}_${tab.url}`;
+    const key = `v:${tab.url}`;
     const storage = await chrome.storage.local.get(key);
     chrome.storage.local.set({ [key]: (storage[key] || 0) + 1 });
   } catch {
@@ -58,9 +73,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   chrome.storage.local.get(null, (items) => {
-    const keysToRemove = Object.keys(items).filter(
-      (k) => k.startsWith(`${tabId}_`) || k.startsWith(`visits_${tabId}_`)
-    );
+    const keysToRemove = Object.keys(items).filter((k) => k.startsWith(`${tabId}_`));
     if (keysToRemove.length > 0) chrome.storage.local.remove(keysToRemove);
   });
 });
