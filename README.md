@@ -24,7 +24,7 @@
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/yourusername/tabwatch.git
+   git clone https://github.com/shadoath/tab-watch.git
    ```
 2. Open Chrome and go to `chrome://extensions`
 3. Enable **Developer mode** (toggle in the top-right)
