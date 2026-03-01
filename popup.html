@@ -279,28 +279,36 @@
       }
 
       /* ── Close button ── */
+      .tab-item {
+        position: relative;
+      }
+
       .close-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
         opacity: 0;
-        flex-shrink: 0;
-        width: 22px;
-        height: 22px;
+        pointer-events: none;
+        width: 20px;
+        height: 20px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: none;
         background: none;
         border-radius: 4px;
-        font-size: 16px;
+        font-size: 15px;
         line-height: 1;
         color: var(--text-url);
         cursor: pointer;
         padding: 0;
-        margin-left: 2px;
         transition: opacity 0.15s, background 0.1s, color 0.1s;
       }
 
       .tab-item:hover .close-btn {
         opacity: 1;
+        pointer-events: auto;
       }
 
       .close-btn:hover {
