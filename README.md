@@ -2,6 +2,8 @@
 
 > See how long every browser tab has been open — search, sort, jump to or close any tab without leaving the popup.
 
+![TabWatch popup](popup-v1.1.0.png)
+
 ---
 
 ## Features
