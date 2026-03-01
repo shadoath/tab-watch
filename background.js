@@ -42,24 +42,15 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab.url) return;
 
-  const newKey      = `${tabId}_${tab.url}`;
-  const newVisitKey = `visits_${tabId}_${tab.url}`;
+  const newKey = `${tabId}_${tab.url}`;
 
-  // Remove stale timestamp and visit keys when the tab navigates to a new URL
+  // Single read: clean up stale keys and write timestamp if not already set
   chrome.storage.local.get(null, (items) => {
-    const staleKeys = Object.keys(items).filter((k) => {
-      if (k.startsWith(`${tabId}_`) && k !== newKey) return true;
-      if (k.startsWith(`visits_${tabId}_`) && k !== newVisitKey) return true;
-      return false;
-    });
+    const staleKeys = Object.keys(items).filter(
+      (k) => k.startsWith(`${tabId}_`) && k !== newKey
+    );
     if (staleKeys.length > 0) chrome.storage.local.remove(staleKeys);
-  });
-
-  // Only write a timestamp if one doesn't exist yet (refresh keeps the timer)
-  chrome.storage.local.get(newKey, (items) => {
-    if (!items[newKey]) {
-      chrome.storage.local.set({ [newKey]: Date.now() });
-    }
+    if (!items[newKey]) chrome.storage.local.set({ [newKey]: Date.now() });
   });
 });
 

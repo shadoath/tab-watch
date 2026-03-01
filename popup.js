@@ -18,6 +18,9 @@ let opts = {};
 let durationEls = new Map(); // tabId → { el, timestamp }
 let tickInterval = null;
 
+// Visible tab items — cached after each render, read by keyboard handler
+let cachedItems = [];
+
 function tick() {
   const now = Date.now();
   durationEls.forEach(({ el, timestamp }) => {
@@ -36,7 +39,7 @@ function startTicker() {
 let focusedIndex = -1;
 
 function getVisibleItems() {
-  return Array.from(document.querySelectorAll("#tab-list .tab-item"));
+  return cachedItems;
 }
 
 function setFocus(index) {
@@ -119,7 +122,8 @@ function renderTabs(tabData, sortBy, dir, query) {
 
   durationEls.clear();
 
-  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp, group, isStale, timestamp, visits }, index) => {
+  filtered.forEach(({ tabId, windowId, title, hostname, favicon, hasTimestamp, group, isStale, timestamp, visits }, index) => {
+    const duration = hasTimestamp ? formatDuration(Date.now() - timestamp) : null;
     const item = document.createElement("div");
     item.className = "tab-item";
 
@@ -143,7 +147,7 @@ function renderTabs(tabData, sortBy, dir, query) {
     item.innerHTML = `
       ${favicon}
       <div class="tab-info">
-        <div class="tab-title" title="${title.replace(/"/g, "&quot;")}">${escapeHtml(title)}</div>
+        <div class="tab-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
         <div class="tab-url">${escapeHtml(hostname)}${visitLabel}</div>
       </div>
       ${groupChip}
@@ -168,6 +172,7 @@ function renderTabs(tabData, sortBy, dir, query) {
       chrome.tabs.remove(tabId);
       item.remove();
       durationEls.delete(tabId);
+      cachedItems = cachedItems.filter((el) => el !== item);
       const idx = tabData.findIndex((t) => t.tabId === tabId);
       if (idx !== -1) tabData.splice(idx, 1);
     });
@@ -186,6 +191,8 @@ function renderTabs(tabData, sortBy, dir, query) {
       durationEls.set(tabId, { el: item.querySelector(".tab-duration"), timestamp });
     }
   });
+
+  cachedItems = Array.from(list.querySelectorAll(".tab-item"));
 }
 
 function escapeHtml(str) {
@@ -255,7 +262,6 @@ async function init() {
       search: `${title} ${hostname}`.toLowerCase(),
       timestamp,
       hasTimestamp,
-      duration: hasTimestamp ? formatDuration(now - timestamp) : null,
       visits,
       group,
       isStale,
