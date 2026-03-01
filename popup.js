@@ -173,6 +173,13 @@ function renderTabs(tabData, sortBy, dir, query) {
     });
     item.appendChild(closeBtn);
 
+    if (index < 5) {
+      const keyBadge = document.createElement("kbd");
+      keyBadge.className = "key-badge";
+      keyBadge.textContent = String(index + 1);
+      item.appendChild(keyBadge);
+    }
+
     list.appendChild(item);
 
     if (hasTimestamp) {

@@ -278,6 +278,34 @@
         opacity: 0.9;
       }
 
+      /* ── Keyboard shortcut badge ── */
+      .key-badge {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        visibility: hidden;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-bottom: 2px solid var(--input-border);
+        border-radius: 3px;
+        font-size: 10px;
+        font-weight: 700;
+        font-family: inherit;
+        color: var(--text-title);
+        line-height: 1;
+        pointer-events: none;
+      }
+
+      .tab-item:hover .key-badge {
+        visibility: visible;
+      }
+
       /* ── Close button ── */
       .tab-item {
         position: relative;

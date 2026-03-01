@@ -33,6 +33,10 @@ async function init() {
   // Apply theme
   if (storage.theme === "light") document.body.classList.add("light");
 
+  // Show extension version
+  document.getElementById("version").textContent =
+    "v" + chrome.runtime.getManifest().version;
+
   // Set initial values from storage, falling back to defaults
   const keys = ["opt_badge", "opt_groups", "opt_warn", "opt_animations", "opt_refresh"];
   keys.forEach((key) => {
