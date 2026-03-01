@@ -14,6 +14,23 @@ const GROUP_COLORS = {
 // Options loaded once per popup open — used by renderTabs via closure
 let opts = {};
 
+// Duration elements keyed by tabId — rebuilt on each full render, read by ticker
+let durationEls = new Map(); // tabId → { el, timestamp }
+let tickInterval = null;
+
+function tick() {
+  const now = Date.now();
+  durationEls.forEach(({ el, timestamp }) => {
+    el.textContent = formatDuration(now - timestamp);
+  });
+}
+
+function startTicker() {
+  if (tickInterval) clearInterval(tickInterval);
+  if (opts.opt_refresh === false) return;
+  tickInterval = setInterval(tick, (opts.opt_refresh_interval ?? 5) * 1000);
+}
+
 function formatDuration(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const seconds = totalSeconds % 60;
@@ -81,7 +98,9 @@ function renderTabs(tabData, sortBy, dir, query) {
     return;
   }
 
-  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp, group, isStale }, index) => {
+  durationEls.clear();
+
+  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp, group, isStale, timestamp }, index) => {
     const item = document.createElement("div");
     item.className = "tab-item";
 
@@ -118,6 +137,10 @@ function renderTabs(tabData, sortBy, dir, query) {
     });
 
     list.appendChild(item);
+
+    if (hasTimestamp) {
+      durationEls.set(tabId, { el: item.querySelector(".tab-duration"), timestamp });
+    }
   });
 }
 
@@ -152,11 +175,13 @@ async function init() {
 
   // Resolve options with defaults
   opts = {
-    opt_badge:      storage.opt_badge      !== false,
-    opt_groups:     storage.opt_groups     !== false,
-    opt_warn:       storage.opt_warn       !== false,
-    opt_warn_days:  storage.opt_warn_days  ?? 7,
-    opt_animations: storage.opt_animations !== false,
+    opt_badge:            storage.opt_badge            !== false,
+    opt_groups:           storage.opt_groups           !== false,
+    opt_warn:             storage.opt_warn             !== false,
+    opt_warn_days:        storage.opt_warn_days        ?? 7,
+    opt_animations:       storage.opt_animations       !== false,
+    opt_refresh:          storage.opt_refresh          !== false,
+    opt_refresh_interval: storage.opt_refresh_interval ?? 5,
   };
 
   // Build groups lookup map
@@ -199,6 +224,7 @@ async function init() {
 
   renderTabs(tabData, currentSort, currentDir, currentQuery);
   updateColHeaders(currentSort, currentDir);
+  startTicker();
 
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
