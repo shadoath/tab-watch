@@ -2,7 +2,7 @@
 
 > See how long every browser tab has been open — search, sort, jump to or close any tab without leaving the popup.
 
-![TabWatch popup](popup-v1.1.0.png)
+![TabWatch popup](assets/popup-v1.1.0.png)
 
 ---
 
@@ -27,6 +27,8 @@ All configurable via the ⚙ settings page:
 - **Animations** — subtle fade-in cascade when the popup opens
 - **Clear tab history** — wipe all stored open-time and visit data
 
+![TabWatch settings](assets/settings-1.1.0.png)
+
 ### Keyboard shortcuts
 | Key | Action |
 |---|---|
@@ -40,7 +42,7 @@ All configurable via the ⚙ settings page:
 ## Install
 
 ### Chrome Web Store
-*(Coming soon)*
+[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/pgjiceamhhcdccdoaiggbfjmmllbhmah)
 
 ### Load from source
 
