@@ -1,3 +1,19 @@
+// Chrome tab group color name → hex
+const GROUP_COLORS = {
+  grey:   "#5f6368",
+  blue:   "#1a73e8",
+  red:    "#d93025",
+  yellow: "#f9ab00",
+  green:  "#1e8e3e",
+  pink:   "#e52592",
+  purple: "#a142f4",
+  cyan:   "#12b5cb",
+  orange: "#e8710a",
+};
+
+// Options loaded once per popup open — used by renderTabs via closure
+let opts = {};
+
 function formatDuration(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const seconds = totalSeconds % 60;
@@ -49,7 +65,6 @@ function renderTabs(tabData, sortBy, dir, query) {
       if (a.timestamp == null && b.timestamp == null) return 0;
       if (a.timestamp == null) return 1;
       if (b.timestamp == null) return -1;
-      // desc = longest open first = smaller timestamp first
       return dir === "desc" ? a.timestamp - b.timestamp : b.timestamp - a.timestamp;
     });
   } else {
@@ -66,9 +81,22 @@ function renderTabs(tabData, sortBy, dir, query) {
     return;
   }
 
-  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp }) => {
+  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp, group, isStale }, index) => {
     const item = document.createElement("div");
     item.className = "tab-item";
+
+    if (isStale) item.classList.add("stale");
+
+    if (opts.opt_animations !== false) {
+      item.classList.add("animate");
+      item.style.animationDelay = `${index * 25}ms`;
+    }
+
+    const groupChip = group
+      ? `<span class="group-chip" style="background:${GROUP_COLORS[group.color] ?? "#5f6368"}">${escapeHtml(group.title || "")}</span>`
+      : "";
+
+    const staleDot = isStale ? `<div class="stale-dot"></div>` : "";
 
     item.innerHTML = `
       ${favicon}
@@ -76,6 +104,8 @@ function renderTabs(tabData, sortBy, dir, query) {
         <div class="tab-title" title="${title.replace(/"/g, "&quot;")}">${escapeHtml(title)}</div>
         <div class="tab-url">${escapeHtml(hostname)}</div>
       </div>
+      ${groupChip}
+      ${staleDot}
       <div class="tab-duration ${hasTimestamp ? "" : "unknown"}">
         ${hasTimestamp ? duration : "—"}
       </div>
@@ -100,13 +130,15 @@ function escapeHtml(str) {
 }
 
 async function init() {
-  const [tabs, storage] = await Promise.all([
+  // Fetch tabs, storage, and tab groups in parallel
+  const [tabs, storage, rawGroups] = await Promise.all([
     chrome.tabs.query({}),
     new Promise((resolve) => chrome.storage.local.get(null, resolve)),
+    chrome.tabGroups ? chrome.tabGroups.query({}) : Promise.resolve([]),
   ]);
 
-  const isLight = storage["theme"] === "light";
-  applyTheme(isLight);
+  // Apply theme
+  applyTheme(storage.theme === "light");
 
   document.getElementById("theme-toggle").addEventListener("click", () => {
     const nowLight = !document.body.classList.contains("light");
@@ -114,15 +146,35 @@ async function init() {
     chrome.storage.local.set({ theme: nowLight ? "light" : "dark" });
   });
 
-  const now = Date.now();
+  document.getElementById("options-btn").addEventListener("click", () => {
+    chrome.runtime.openOptionsPage();
+  });
 
-  // Build a plain data array — all rendering reads from this
+  // Resolve options with defaults
+  opts = {
+    opt_badge:      storage.opt_badge      !== false,
+    opt_groups:     storage.opt_groups     !== false,
+    opt_warn:       storage.opt_warn       !== false,
+    opt_warn_days:  storage.opt_warn_days  ?? 7,
+    opt_animations: storage.opt_animations !== false,
+  };
+
+  // Build groups lookup map
+  const groups = {};
+  rawGroups.forEach((g) => { groups[g.id] = g; });
+
+  const now = Date.now();
+  const warnMs = opts.opt_warn_days * 24 * 60 * 60 * 1000;
+
+  // Build tab data array
   const tabData = tabs.map((tab) => {
     const key = `${tab.id}_${tab.url}`;
     const timestamp = storage[key] ?? null;
     const hasTimestamp = timestamp !== null;
     const title = tab.title || "Untitled";
     const hostname = getHostname(tab.url || "");
+    const group = (opts.opt_groups && tab.groupId > 0) ? groups[tab.groupId] ?? null : null;
+    const isStale = opts.opt_warn && hasTimestamp && (now - timestamp) > warnMs;
 
     return {
       tabId: tab.id,
@@ -133,6 +185,8 @@ async function init() {
       timestamp,
       hasTimestamp,
       duration: hasTimestamp ? formatDuration(now - timestamp) : null,
+      group,
+      isStale,
       favicon: tab.favIconUrl
         ? `<img class="favicon" src="${tab.favIconUrl}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'), {className: 'favicon-placeholder'}))">`
         : `<div class="favicon-placeholder"></div>`,
@@ -140,13 +194,12 @@ async function init() {
   });
 
   let currentSort = "duration";
-  let currentDir = "desc"; // longest open first
+  let currentDir = "desc";
   let currentQuery = "";
 
   renderTabs(tabData, currentSort, currentDir, currentQuery);
   updateColHeaders(currentSort, currentDir);
 
-  // Search
   const search = document.getElementById("search");
   search.addEventListener("input", () => {
     currentQuery = search.value.trim().toLowerCase();
@@ -154,7 +207,6 @@ async function init() {
   });
   search.focus();
 
-  // Column header sort
   document.querySelectorAll(".col-hd").forEach((col) => {
     col.addEventListener("click", () => {
       const field = col.dataset.sort;

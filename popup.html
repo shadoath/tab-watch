@@ -30,6 +30,7 @@
         --toggle-bg:         #161c2d;
         --toggle-border:     #243050;
         --toggle-text:       #7b8cc8;
+        --stale-color:       #f9ab00;
       }
 
       /* ── Light theme ── */
@@ -51,6 +52,7 @@
         --toggle-bg:         #ffffff;
         --toggle-border:     #c0d0f0;
         --toggle-text:       #5070c8;
+        --stale-color:       #d48000;
       }
 
       body {
@@ -82,6 +84,12 @@
         color: var(--text-label);
       }
 
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
       #theme-toggle {
         display: flex;
         align-items: center;
@@ -104,6 +112,21 @@
       #theme-toggle .icon {
         font-size: 13px;
         line-height: 1;
+      }
+
+      #options-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        color: var(--toggle-text);
+        padding: 2px 4px;
+        line-height: 1;
+        transition: color 0.15s;
+      }
+
+      #options-btn:hover {
+        color: var(--accent);
       }
 
       .search-wrap {
@@ -137,13 +160,25 @@
         flex: 1;
       }
 
+      /* ── Animations ── */
+      @keyframes tabIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .tab-item.animate {
+        opacity: 0;
+        animation: tabIn 0.18s ease forwards;
+      }
+
+      /* ── Tab rows ── */
       .tab-item {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 10px 16px;
         border-bottom: 1px solid var(--border-item);
-        transition: background 0.1s;
+        transition: background 0.1s, opacity 0.15s;
         cursor: pointer;
       }
 
@@ -155,6 +190,28 @@
         border-bottom: none;
       }
 
+      /* ── Stale warning ── */
+      .tab-item.stale {
+        opacity: 0.45;
+      }
+
+      .tab-item.stale:hover {
+        opacity: 0.75;
+      }
+
+      .tab-item.stale .tab-duration {
+        color: var(--stale-color);
+      }
+
+      .stale-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--stale-color);
+        flex-shrink: 0;
+      }
+
+      /* ── Favicon ── */
       .favicon {
         width: 16px;
         height: 16px;
@@ -170,6 +227,7 @@
         border-radius: 2px;
       }
 
+      /* ── Tab info ── */
       .tab-info {
         flex: 1;
         min-width: 0;
@@ -193,6 +251,22 @@
         margin-top: 1px;
       }
 
+      /* ── Tab group chip ── */
+      .group-chip {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 1px 6px;
+        border-radius: 10px;
+        color: #fff;
+        flex-shrink: 0;
+        max-width: 72px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        opacity: 0.9;
+      }
+
+      /* ── Duration ── */
       .tab-duration {
         font-size: 12px;
         font-variant-numeric: tabular-nums;
@@ -206,6 +280,7 @@
         color: var(--text-unknown);
       }
 
+      /* ── Column headers ── */
       .col-header {
         display: flex;
         align-items: center;
@@ -267,10 +342,13 @@
   <body>
     <header>
       <h1>TabWatch</h1>
-      <button id="theme-toggle">
-        <span class="icon">☀</span>
-        <span class="label">Light</span>
-      </button>
+      <div class="header-actions">
+        <button id="theme-toggle">
+          <span class="icon">☀</span>
+          <span class="label">Light</span>
+        </button>
+        <button id="options-btn" title="Settings">⚙</button>
+      </div>
     </header>
     <div class="search-wrap">
       <input id="search" type="text" placeholder="Search tabs..." autocomplete="off" spellcheck="false" />
