@@ -19,29 +19,43 @@ chrome.tabs.onRemoved.addListener(updateBadge);
 chrome.runtime.onInstalled.addListener(updateBadge);
 chrome.runtime.onStartup.addListener(updateBadge);
 
-// React when the badge option is toggled in settings
 chrome.storage.onChanged.addListener((changes) => {
   if ("opt_badge" in changes) updateBadge();
 });
 
+// ── Visit counter ─────────────────────────────────────────────────────────────
+
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    if (!tab.url) return;
+    const key = `visits_${tabId}_${tab.url}`;
+    const storage = await chrome.storage.local.get(key);
+    chrome.storage.local.set({ [key]: (storage[key] || 0) + 1 });
+  } catch {
+    // Tab may have been closed before we could read it
+  }
+});
+
 // ── Tab timestamps ────────────────────────────────────────────────────────────
 
-// When a tab finishes loading, record the timestamp keyed by tabId + url
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab.url) return;
 
-  const newKey = `${tabId}_${tab.url}`;
+  const newKey      = `${tabId}_${tab.url}`;
+  const newVisitKey = `visits_${tabId}_${tab.url}`;
 
-  // Remove any old keys for this tab (e.g. the user navigated to a new URL)
+  // Remove stale timestamp and visit keys when the tab navigates to a new URL
   chrome.storage.local.get(null, (items) => {
-    const staleKeys = Object.keys(items).filter(
-      (k) => k.startsWith(`${tabId}_`) && k !== newKey
-    );
+    const staleKeys = Object.keys(items).filter((k) => {
+      if (k.startsWith(`${tabId}_`) && k !== newKey) return true;
+      if (k.startsWith(`visits_${tabId}_`) && k !== newVisitKey) return true;
+      return false;
+    });
     if (staleKeys.length > 0) chrome.storage.local.remove(staleKeys);
   });
 
-  // Only write if there isn't already a timestamp for this exact key,
-  // so refreshing the page doesn't reset the timer
+  // Only write a timestamp if one doesn't exist yet (refresh keeps the timer)
   chrome.storage.local.get(newKey, (items) => {
     if (!items[newKey]) {
       chrome.storage.local.set({ [newKey]: Date.now() });
@@ -49,11 +63,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   });
 });
 
-// Clean up when a tab closes
+// ── Cleanup on tab close ──────────────────────────────────────────────────────
+
 chrome.tabs.onRemoved.addListener((tabId) => {
   chrome.storage.local.get(null, (items) => {
-    const keysToRemove = Object.keys(items).filter((k) =>
-      k.startsWith(`${tabId}_`)
+    const keysToRemove = Object.keys(items).filter(
+      (k) => k.startsWith(`${tabId}_`) || k.startsWith(`visits_${tabId}_`)
     );
     if (keysToRemove.length > 0) chrome.storage.local.remove(keysToRemove);
   });

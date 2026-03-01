@@ -119,7 +119,7 @@ function renderTabs(tabData, sortBy, dir, query) {
 
   durationEls.clear();
 
-  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp, group, isStale, timestamp }, index) => {
+  filtered.forEach(({ tabId, windowId, title, hostname, favicon, duration, hasTimestamp, group, isStale, timestamp, visits }, index) => {
     const item = document.createElement("div");
     item.className = "tab-item";
 
@@ -136,11 +136,15 @@ function renderTabs(tabData, sortBy, dir, query) {
 
     const staleDot = isStale ? `<div class="stale-dot"></div>` : "";
 
+    const visitLabel = visits > 0
+      ? `<span class="tab-visits"> · ${visits} visit${visits !== 1 ? "s" : ""}</span>`
+      : "";
+
     item.innerHTML = `
       ${favicon}
       <div class="tab-info">
         <div class="tab-title" title="${title.replace(/"/g, "&quot;")}">${escapeHtml(title)}</div>
-        <div class="tab-url">${escapeHtml(hostname)}</div>
+        <div class="tab-url">${escapeHtml(hostname)}${visitLabel}</div>
       </div>
       ${groupChip}
       ${staleDot}
@@ -234,6 +238,8 @@ async function init() {
     const group = (opts.opt_groups && tab.groupId > 0) ? groups[tab.groupId] ?? null : null;
     const isStale = opts.opt_warn && hasTimestamp && (now - timestamp) > warnMs;
 
+    const visits = storage[`visits_${tab.id}_${tab.url}`] || 0;
+
     return {
       tabId: tab.id,
       windowId: tab.windowId,
@@ -243,6 +249,7 @@ async function init() {
       timestamp,
       hasTimestamp,
       duration: hasTimestamp ? formatDuration(now - timestamp) : null,
+      visits,
       group,
       isStale,
       favicon: tab.favIconUrl
