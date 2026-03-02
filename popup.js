@@ -1,6 +1,6 @@
 // Chrome tab group color name → hex
 const GROUP_COLORS = {
-	grey: "'#5f6368',
+  grey: '#5f6368',
   blue: '#1a73e8',
   red: '#d93025',
   yellow: '#f9ab00',
@@ -411,50 +411,4 @@ async function init() {
   })
 }
 
-init()dow.close();
-				break;
-			default: {
-				const num = Number.parseInt(e.key, 10);
-				if (num >= 1 && num <= 5 && search.value === "") {
-					e.preventDefault();
-					items[num - 1]?.click();
-				}
-			}
-		}
-	});
-
-	search.focus();
-
-	// Live option sync — pick up changes saved in the options page
-	chrome.storage.onChanged.addListener((changes) => {
-		let needsRender = false;
-		for (const [key, { newValue }] of Object.entries(changes)) {
-			if (key === "theme") {
-				applyTheme(newValue === "light");
-				continue;
-			}
-			if (!(key in opts)) continue;
-			opts[key] = newValue;
-			if (key === "opt_refresh" || key === "opt_refresh_interval")
-				startTicker();
-			else needsRender = true;
-		}
-		if (needsRender) renderTabs(tabData, currentSort, currentDir, currentQuery);
-	});
-
-	document.querySelectorAll(".col-hd").forEach((col) => {
-		col.addEventListener("click", () => {
-			const field = col.dataset.sort;
-			if (field === currentSort) {
-				currentDir = currentDir === "asc" ? "desc" : "asc";
-			} else {
-				currentSort = field;
-				currentDir = field === "duration" ? "desc" : "asc";
-			}
-			updateColHeaders(currentSort, currentDir);
-			renderTabs(tabData, currentSort, currentDir, currentQuery);
-		});
-	});
-}
-
-init();
+init()

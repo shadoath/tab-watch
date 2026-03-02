@@ -125,29 +125,4 @@ async function init() {
 }
 
 init()
-			daysEl.value = val;
-			chrome.storage.local.set({ opt_warn_days: val });
-			showSaved();
-		}, 600);
-	});
 
-	// Clear tab history (timestamps + visit counts)
-	document
-		.getElementById("clear-storage")
-		.addEventListener("click", async () => {
-			const items = await new Promise((resolve) =>
-				chrome.storage.local.get(null, resolve),
-			);
-			const keysToRemove = Object.keys(items).filter(
-				(k) => /^\d+_/.test(k) || k.startsWith("v:"),
-			);
-			if (keysToRemove.length > 0) {
-				await new Promise((resolve) =>
-					chrome.storage.local.remove(keysToRemove, resolve),
-				);
-			}
-			showSaved();
-		});
-}
-
-init();
