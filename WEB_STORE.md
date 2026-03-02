@@ -10,6 +10,7 @@ The Description and Short Description fields do not support markdown — plain t
 ---
 
 ### Short Description
+
 (132 character max — used as the subtitle in search results)
 
 ```
@@ -19,6 +20,7 @@ See how long every tab has been open. Search, sort, jump to any tab, and close t
 ---
 
 ### Full Description
+
 (Plain text, no markdown)
 
 ```

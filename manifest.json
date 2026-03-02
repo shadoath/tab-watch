@@ -2,6 +2,7 @@
   "manifest_version": 3,
   "name": "TabWatch",
   "version": "1.1.0",
+  "author": "Skylar Bolton",
   "description": "See how long every tab has been open. Search, sort by duration or title, and jump to any tab in one click.",
   "homepage_url": "https://github.com/shadoath/tab-watch",
   "permissions": ["tabs", "storage", "windows", "tabGroups"],

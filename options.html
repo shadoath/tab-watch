@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -13,42 +13,44 @@
 
       /* ── Dark theme (default) ── */
       :root {
-        --bg:           #0d1117;
-        --bg-card:      #111827;
-        --border:       #1a2235;
-        --text:         #e2e8f8;
-        --text-title:   #ccd6f6;
-        --text-label:   #7b8cc8;
-        --text-sub:     #4a5580;
-        --accent:       #1a6bff;
-        --input-bg:     #161c2d;
+        --bg: #0d1117;
+        --bg-card: #111827;
+        --border: #1a2235;
+        --text: #e2e8f8;
+        --text-title: #ccd6f6;
+        --text-label: #7b8cc8;
+        --text-sub: #4a5580;
+        --accent: #1a6bff;
+        --input-bg: #161c2d;
         --input-border: #243050;
         --toggle-track: #243050;
         --toggle-thumb: #4a5580;
       }
 
       body.light {
-        --bg:           #f0f4ff;
-        --bg-card:      #ffffff;
-        --border:       #d0daf5;
-        --text:         #0d1433;
-        --text-title:   #1a2455;
-        --text-label:   #5070c8;
-        --text-sub:     #7090cc;
-        --accent:       #1a6bff;
-        --input-bg:     #ffffff;
+        --bg: #f0f4ff;
+        --bg-card: #ffffff;
+        --border: #d0daf5;
+        --text: #0d1433;
+        --text-title: #1a2455;
+        --text-label: #5070c8;
+        --text-sub: #7090cc;
+        --accent: #1a6bff;
+        --input-bg: #ffffff;
         --input-border: #c0d0f0;
         --toggle-track: #d0daf5;
         --toggle-thumb: #7090cc;
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         background: var(--bg);
         color: var(--text);
         min-height: 100vh;
         padding: 32px 24px;
-        transition: background 0.2s, color 0.2s;
+        transition:
+          background 0.2s,
+          color 0.2s;
       }
 
       .page {
@@ -161,7 +163,7 @@
       }
 
       .toggle-slider::before {
-        content: "";
+        content: '';
         position: absolute;
         width: 16px;
         height: 16px;
@@ -169,7 +171,9 @@
         top: 3px;
         background: var(--toggle-thumb);
         border-radius: 50%;
-        transition: transform 0.2s, background 0.2s;
+        transition:
+          transform 0.2s,
+          background 0.2s;
       }
 
       .toggle-wrap input:checked + .toggle-slider {
@@ -195,7 +199,7 @@
         color: var(--text-sub);
       }
 
-      .threshold-row input[type="number"] {
+      .threshold-row input[type='number'] {
         width: 56px;
         background: var(--input-bg);
         border: 1px solid var(--input-border);
@@ -209,12 +213,12 @@
         -moz-appearance: textfield;
       }
 
-      .threshold-row input[type="number"]::-webkit-inner-spin-button,
-      .threshold-row input[type="number"]::-webkit-outer-spin-button {
+      .threshold-row input[type='number']::-webkit-inner-spin-button,
+      .threshold-row input[type='number']::-webkit-outer-spin-button {
         opacity: 1;
       }
 
-      .threshold-row input[type="number"]:focus {
+      .threshold-row input[type='number']:focus {
         border-color: var(--accent);
       }
 
@@ -259,7 +263,9 @@
         padding: 5px 10px;
         cursor: pointer;
         color: var(--text-sub);
-        transition: background 0.15s, color 0.15s;
+        transition:
+          background 0.15s,
+          color 0.15s;
         white-space: nowrap;
       }
 
@@ -284,7 +290,9 @@
         cursor: pointer;
         font-size: 12px;
         color: var(--text-label);
-        transition: border-color 0.15s, color 0.15s;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
       }
 
       #theme-toggle:hover {
@@ -302,7 +310,9 @@
         font-weight: 500;
         color: var(--text-label);
         cursor: pointer;
-        transition: border-color 0.15s, color 0.15s;
+        transition:
+          border-color 0.15s,
+          color 0.15s;
         flex-shrink: 0;
       }
 
@@ -333,12 +343,15 @@
           <h1>TabWatch Settings</h1>
           <p>Changes save automatically</p>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display: flex; align-items: center; gap: 10px">
           <button id="theme-toggle">
             <span class="icon">☀</span>
             <span class="label">Light</span>
           </button>
-          <span id="version" style="font-size:11px;color:var(--text-sub);"></span>
+          <span
+            id="version"
+            style="font-size: 11px; color: var(--text-sub)"
+          ></span>
         </div>
       </div>
 
@@ -349,7 +362,9 @@
           <div class="option-row">
             <div class="option-text">
               <div class="option-label">Badge count</div>
-              <div class="option-desc">Show the number of open tabs on the extension icon</div>
+              <div class="option-desc">
+                Show the number of open tabs on the extension icon
+              </div>
             </div>
             <label class="toggle-wrap">
               <input type="checkbox" id="opt_badge" />
@@ -366,7 +381,9 @@
           <div class="option-row">
             <div class="option-text">
               <div class="option-label">Tab groups</div>
-              <div class="option-desc">Show color and name for grouped tabs</div>
+              <div class="option-desc">
+                Show color and name for grouped tabs
+              </div>
             </div>
             <label class="toggle-wrap">
               <input type="checkbox" id="opt_groups" />
@@ -376,7 +393,9 @@
           <div class="option-row" id="warn-row">
             <div class="option-text">
               <div class="option-label">Tab limit warning</div>
-              <div class="option-desc">Dim tabs that have been open too long</div>
+              <div class="option-desc">
+                Dim tabs that have been open too long
+              </div>
             </div>
             <label class="toggle-wrap">
               <input type="checkbox" id="opt_warn" />
@@ -408,7 +427,9 @@
           <div class="option-row">
             <div class="option-text">
               <div class="option-label">Auto-refresh</div>
-              <div class="option-desc">Keep durations updating while the popup is open</div>
+              <div class="option-desc">
+                Keep durations updating while the popup is open
+              </div>
             </div>
             <label class="toggle-wrap">
               <input type="checkbox" id="opt_refresh" />
@@ -418,10 +439,22 @@
           <div class="interval-row" id="interval-row">
             <label>Update every</label>
             <div class="seg-control">
-              <label class="seg-btn"><input type="radio" name="opt_refresh_interval" value="1" /> 1s</label>
-              <label class="seg-btn"><input type="radio" name="opt_refresh_interval" value="3" /> 3s</label>
-              <label class="seg-btn"><input type="radio" name="opt_refresh_interval" value="5" /> 5s</label>
-              <label class="seg-btn"><input type="radio" name="opt_refresh_interval" value="10" /> 10s</label>
+              <label class="seg-btn"
+                ><input type="radio" name="opt_refresh_interval" value="1" />
+                1s</label
+              >
+              <label class="seg-btn"
+                ><input type="radio" name="opt_refresh_interval" value="3" />
+                3s</label
+              >
+              <label class="seg-btn"
+                ><input type="radio" name="opt_refresh_interval" value="5" />
+                5s</label
+              >
+              <label class="seg-btn"
+                ><input type="radio" name="opt_refresh_interval" value="10" />
+                10s</label
+              >
             </div>
           </div>
         </div>
@@ -434,7 +467,9 @@
           <div class="option-row">
             <div class="option-text">
               <div class="option-label">Clear tab history</div>
-              <div class="option-desc">Remove all stored open-time and visit data</div>
+              <div class="option-desc">
+                Remove all stored open-time and visit data
+              </div>
             </div>
             <button id="clear-storage">Clear</button>
           </div>

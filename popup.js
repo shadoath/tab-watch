@@ -1,224 +1,263 @@
 // Chrome tab group color name → hex
 const GROUP_COLORS = {
-  grey:   "#5f6368",
-  blue:   "#1a73e8",
-  red:    "#d93025",
-  yellow: "#f9ab00",
-  green:  "#1e8e3e",
-  pink:   "#e52592",
-  purple: "#a142f4",
-  cyan:   "#12b5cb",
-  orange: "#e8710a",
-};
+	grey: "'#5f6368',
+  blue: '#1a73e8',
+  red: '#d93025',
+  yellow: '#f9ab00',
+  green: '#1e8e3e',
+  pink: '#e52592',
+  purple: '#a142f4',
+  cyan: '#12b5cb',
+  orange: '#e8710a',
+}
 
 // Duration text color scaled to the user's warn threshold
 function getAgeColor(timestamp, warnDays) {
-  const ratio = (Date.now() - timestamp) / (warnDays * 86400000);
-  if (ratio < 0.25) return "var(--accent)"; // fresh
-  if (ratio < 0.50) return "#facc15";       // quarter way — yellow
-  if (ratio < 1.00) return "#f97316";       // halfway to stale — orange
-  return "#ef4444";                         // at/past threshold — red
+  const ratio = (Date.now() - timestamp) / (warnDays * 86400000)
+  if (ratio < 0.25) return 'var(--accent)' // fresh
+  if (ratio < 0.5) return '#facc15' // quarter way — yellow
+  if (ratio < 1.0) return '#f97316' // halfway to stale — orange
+  return '#ef4444' // at/past threshold — red
 }
 
 // Options loaded once per popup open — used by renderTabs via closure
-let opts = {};
+let opts = {}
 
 // Duration elements keyed by tabId — rebuilt on each full render, read by ticker
-let durationEls = new Map(); // tabId → { el, timestamp }
-let tickInterval = null;
+let durationEls = new Map() // tabId → { el, timestamp }
+let tickInterval = null
 
 // Visible tab items — cached after each render, read by keyboard handler
-let cachedItems = [];
+let cachedItems = []
 
 function tick() {
-  const now = Date.now();
-  const warnDays = opts.opt_warn_days;
+  const now = Date.now()
+  const warnDays = opts.opt_warn_days
   durationEls.forEach(({ el, timestamp }) => {
-    el.textContent = formatDuration(now - timestamp);
-    el.style.color = getAgeColor(timestamp, warnDays);
-  });
+    el.textContent = formatDuration(now - timestamp)
+    el.style.color = getAgeColor(timestamp, warnDays)
+  })
 }
 
 function startTicker() {
-  if (tickInterval) clearInterval(tickInterval);
-  if (opts.opt_refresh === false) return;
-  tickInterval = setInterval(tick, (opts.opt_refresh_interval ?? 5) * 1000);
+  if (tickInterval) clearInterval(tickInterval)
+  if (opts.opt_refresh === false) return
+  tickInterval = setInterval(tick, (opts.opt_refresh_interval ?? 5) * 1000)
 }
 
 // ── Keyboard navigation ──────────────────────────────────────────────────────
 
-let focusedIndex = -1;
+let focusedIndex = -1
 
 function getVisibleItems() {
-  return cachedItems;
+  return cachedItems
 }
 
 function setFocus(index) {
-  const items = getVisibleItems();
-  if (!items.length) return;
-  focusedIndex = Math.max(0, Math.min(items.length - 1, index));
-  items.forEach((item, i) => item.classList.toggle("focused", i === focusedIndex));
-  items[focusedIndex].scrollIntoView({ block: "nearest" });
+  const items = getVisibleItems()
+  if (!items.length) return
+  focusedIndex = Math.max(0, Math.min(items.length - 1, index))
+  items.forEach((item, i) =>
+    item.classList.toggle('focused', i === focusedIndex),
+  )
+  items[focusedIndex].scrollIntoView({ block: 'nearest' })
 }
 
 // ── Formatting ───────────────────────────────────────────────────────────────
 
 function formatDuration(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const seconds = totalSeconds % 60;
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const minutes = totalMinutes % 60;
-  const totalHours = Math.floor(totalMinutes / 60);
-  const hours = totalHours % 24;
-  const days = Math.floor(totalHours / 24);
+  const totalSeconds = Math.floor(ms / 1000)
+  const seconds = totalSeconds % 60
+  const totalMinutes = Math.floor(totalSeconds / 60)
+  const minutes = totalMinutes % 60
+  const totalHours = Math.floor(totalMinutes / 60)
+  const hours = totalHours % 24
+  const days = Math.floor(totalHours / 24)
 
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
+  if (days > 0) return `${days}d ${hours}h`
+  if (hours > 0) return `${hours}h ${minutes}m`
+  if (minutes > 0) return `${minutes}m ${seconds}s`
+  return `${seconds}s`
 }
 
 function getHostname(url) {
   try {
-    return new URL(url).hostname.replace(/^www\./, "");
+    return new URL(url).hostname.replace(/^www\./, '')
   } catch {
-    return url;
+    return url
   }
 }
 
 function applyTheme(isLight) {
-  document.body.classList.toggle("light", isLight);
-  const toggle = document.getElementById("theme-toggle");
-  toggle.querySelector(".icon").textContent = isLight ? "☽" : "☀";
-  toggle.querySelector(".label").textContent = isLight ? "Dark" : "Light";
+  document.body.classList.toggle('light', isLight)
+  const toggle = document.getElementById('theme-toggle')
+  toggle.querySelector('.icon').textContent = isLight ? '☽' : '☀'
+  toggle.querySelector('.label').textContent = isLight ? 'Dark' : 'Light'
 }
 
 function updateColHeaders(sortBy, dir) {
-  document.querySelectorAll(".col-hd").forEach((col) => {
-    const isActive = col.dataset.sort === sortBy;
-    col.classList.toggle("active", isActive);
-    col.querySelector(".sort-arrow").textContent = isActive
-      ? dir === "asc" ? "↑" : "↓"
-      : "";
-  });
+  document.querySelectorAll('.col-hd').forEach((col) => {
+    const isActive = col.dataset.sort === sortBy
+    col.classList.toggle('active', isActive)
+    col.querySelector('.sort-arrow').textContent = isActive
+      ? dir === 'asc'
+        ? '↑'
+        : '↓'
+      : ''
+  })
 }
 
 function renderTabs(tabData, sortBy, dir, query) {
-  focusedIndex = -1;
-  const list = document.getElementById("tab-list");
-  list.innerHTML = "";
+  focusedIndex = -1
+  const list = document.getElementById('tab-list')
+  list.innerHTML = ''
 
-  let sorted = [...tabData];
+  let sorted = [...tabData]
 
-  if (sortBy === "duration") {
+  if (sortBy === 'duration') {
     sorted.sort((a, b) => {
-      if (a.timestamp == null && b.timestamp == null) return 0;
-      if (a.timestamp == null) return 1;
-      if (b.timestamp == null) return -1;
-      return dir === "desc" ? a.timestamp - b.timestamp : b.timestamp - a.timestamp;
-    });
+      if (a.timestamp == null && b.timestamp == null) return 0
+      if (a.timestamp == null) return 1
+      if (b.timestamp == null) return -1
+      return dir === 'desc'
+        ? a.timestamp - b.timestamp
+        : b.timestamp - a.timestamp
+    })
   } else {
     sorted.sort((a, b) => {
-      const cmp = a.title.localeCompare(b.title);
-      return dir === "asc" ? cmp : -cmp;
-    });
+      const cmp = a.title.localeCompare(b.title)
+      return dir === 'asc' ? cmp : -cmp
+    })
   }
 
-  const filtered = query ? sorted.filter((t) => t.search.includes(query)) : sorted;
+  const filtered = query
+    ? sorted.filter((t) => t.search.includes(query))
+    : sorted
 
   if (filtered.length === 0) {
-    list.innerHTML = `<div class="empty">${query ? "No matching tabs" : "No tabs open"}</div>`;
-    return;
+    list.innerHTML = `<div class="empty">${query ? 'No matching tabs' : 'No tabs open'}</div>`
+    return
   }
 
-  durationEls.clear();
+  durationEls.clear()
 
-  filtered.forEach(({ tabId, windowId, title, hostname, favIconUrl, hasTimestamp, group, isStale, timestamp, visits }, index) => {
-    const duration = hasTimestamp ? formatDuration(Date.now() - timestamp) : null;
-    const item = document.createElement("div");
-    item.className = "tab-item";
+  filtered.forEach(
+    (
+      {
+        tabId,
+        windowId,
+        title,
+        hostname,
+        favIconUrl,
+        hasTimestamp,
+        group,
+        isStale,
+        timestamp,
+        visits,
+      },
+      index,
+    ) => {
+      const duration = hasTimestamp
+        ? formatDuration(Date.now() - timestamp)
+        : null
+      const item = document.createElement('div')
+      item.className = 'tab-item'
 
-    const faviconEl = favIconUrl ? Object.assign(document.createElement("img"), {
-      className: "favicon", src: favIconUrl, alt: "",
-    }) : Object.assign(document.createElement("div"), { className: "favicon-placeholder" });
-    if (favIconUrl) faviconEl.onerror = () => faviconEl.replaceWith(Object.assign(document.createElement("div"), { className: "favicon-placeholder" }));
+      const faviconEl = favIconUrl
+        ? Object.assign(document.createElement('img'), {
+            className: 'favicon',
+            src: favIconUrl,
+            alt: '',
+          })
+        : Object.assign(document.createElement('div'), {
+            className: 'favicon-placeholder',
+          })
+      if (favIconUrl)
+        faviconEl.onerror = () =>
+          faviconEl.replaceWith(
+            Object.assign(document.createElement('div'), {
+              className: 'favicon-placeholder',
+            }),
+          )
 
-    if (isStale) item.classList.add("stale");
+      if (isStale) item.classList.add('stale')
 
-    if (opts.opt_animations !== false) {
-      item.classList.add("animate");
-      item.style.animationDelay = `${index * 25}ms`;
-    }
+      if (opts.opt_animations !== false) {
+        item.classList.add('animate')
+        item.style.animationDelay = `${index * 25}ms`
+      }
 
-    const groupChip = group
-      ? `<span class="group-chip" style="background:${GROUP_COLORS[group.color] ?? "#5f6368"}">${escapeHtml(group.title || "")}</span>`
-      : "";
+      const groupChip = group
+        ? `<span class="group-chip" style="background:${GROUP_COLORS[group.color] ?? '#5f6368'}">${escapeHtml(group.title || '')}</span>`
+        : ''
 
-    const staleDot = isStale ? `<div class="stale-dot"></div>` : "";
+      const staleDot = isStale ? `<div class="stale-dot"></div>` : ''
 
-    const visitLabel = visits > 0
-      ? `<span class="tab-visits"> · ${visits} visit${visits !== 1 ? "s" : ""}</span>`
-      : "";
+      const visitLabel =
+        visits > 0
+          ? `<span class="tab-visits"> · ${visits} visit${visits !== 1 ? 's' : ''}</span>`
+          : ''
 
-    item.innerHTML = `
+      item.innerHTML = `
       <div class="tab-info">
         <div class="tab-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
         <div class="tab-url">${escapeHtml(hostname)}${visitLabel}</div>
       </div>
       ${groupChip}
       ${staleDot}
-      <div class="tab-duration ${hasTimestamp ? "" : "unknown"}">
-        ${hasTimestamp ? duration : "—"}
+      <div class="tab-duration ${hasTimestamp ? '' : 'unknown'}">
+        ${hasTimestamp ? duration : '—'}
       </div>
-    `;
-    item.prepend(faviconEl);
+    `
+      item.prepend(faviconEl)
 
-    item.addEventListener("click", () => {
-      chrome.tabs.update(tabId, { active: true });
-      chrome.windows.update(windowId, { focused: true });
-      window.close();
-    });
+      item.addEventListener('click', () => {
+        chrome.tabs.update(tabId, { active: true })
+        chrome.windows.update(windowId, { focused: true })
+        window.close()
+      })
 
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "close-btn";
-    closeBtn.title = "Close tab";
-    closeBtn.textContent = "×";
-    closeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      chrome.tabs.remove(tabId);
-      item.remove();
-      durationEls.delete(tabId);
-      cachedItems = cachedItems.filter((el) => el !== item);
-      const idx = tabData.findIndex((t) => t.tabId === tabId);
-      if (idx !== -1) tabData.splice(idx, 1);
-    });
-    item.appendChild(closeBtn);
+      const closeBtn = document.createElement('button')
+      closeBtn.className = 'close-btn'
+      closeBtn.title = 'Close tab'
+      closeBtn.textContent = '×'
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        chrome.tabs.remove(tabId)
+        item.remove()
+        durationEls.delete(tabId)
+        cachedItems = cachedItems.filter((el) => el !== item)
+        const idx = tabData.findIndex((t) => t.tabId === tabId)
+        if (idx !== -1) tabData.splice(idx, 1)
+      })
+      item.appendChild(closeBtn)
 
-    if (index < 5) {
-      const keyBadge = document.createElement("kbd");
-      keyBadge.className = "key-badge";
-      keyBadge.textContent = String(index + 1);
-      item.appendChild(keyBadge);
-    }
+      if (index < 5) {
+        const keyBadge = document.createElement('kbd')
+        keyBadge.className = 'key-badge'
+        keyBadge.textContent = String(index + 1)
+        item.appendChild(keyBadge)
+      }
 
-    list.appendChild(item);
+      list.appendChild(item)
 
-    if (hasTimestamp) {
-      const durationEl = item.querySelector(".tab-duration");
-      durationEl.style.color = getAgeColor(timestamp, opts.opt_warn_days);
-      durationEls.set(tabId, { el: durationEl, timestamp });
-    }
-  });
+      if (hasTimestamp) {
+        const durationEl = item.querySelector('.tab-duration')
+        durationEl.style.color = getAgeColor(timestamp, opts.opt_warn_days)
+        durationEls.set(tabId, { el: durationEl, timestamp })
+      }
+    },
+  )
 
-  cachedItems = Array.from(list.querySelectorAll(".tab-item"));
+  cachedItems = Array.from(list.querySelectorAll('.tab-item'))
 }
 
 function escapeHtml(str) {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 async function init() {
@@ -226,54 +265,57 @@ async function init() {
   const [tabs, rawGroups] = await Promise.all([
     chrome.tabs.query({}),
     chrome.tabGroups ? chrome.tabGroups.query({}) : Promise.resolve([]),
-  ]);
+  ])
 
-  const urlTabs = tabs.filter((t) => t.url);
-  const tsKeys    = urlTabs.map((t) => `${t.id}_${t.url}`);
-  const visitKeys = [...new Set(urlTabs.map((t) => `v:${t.url}`))];
-  const metaKeys  = [...Object.keys(DEFAULTS), "theme"];
+  const urlTabs = tabs.filter((t) => t.url)
+  const tsKeys = urlTabs.map((t) => `${t.id}_${t.url}`)
+  const visitKeys = [...new Set(urlTabs.map((t) => `v:${t.url}`))]
+  const metaKeys = [...Object.keys(DEFAULTS), 'theme']
 
   const storage = await new Promise((resolve) =>
-    chrome.storage.local.get([...tsKeys, ...visitKeys, ...metaKeys], resolve)
-  );
+    chrome.storage.local.get([...tsKeys, ...visitKeys, ...metaKeys], resolve),
+  )
 
   // Apply theme
-  applyTheme(storage.theme === "light");
+  applyTheme(storage.theme === 'light')
 
-  document.getElementById("theme-toggle").addEventListener("click", () => {
-    const nowLight = !document.body.classList.contains("light");
-    applyTheme(nowLight);
-    chrome.storage.local.set({ theme: nowLight ? "light" : "dark" });
-  });
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const nowLight = !document.body.classList.contains('light')
+    applyTheme(nowLight)
+    chrome.storage.local.set({ theme: nowLight ? 'light' : 'dark' })
+  })
 
-  document.getElementById("options-btn").addEventListener("click", () => {
-    chrome.runtime.openOptionsPage();
-  });
+  document.getElementById('options-btn').addEventListener('click', () => {
+    chrome.runtime.openOptionsPage()
+  })
 
   // Resolve options with defaults
-  opts = {};
+  opts = {}
   for (const [key, def] of Object.entries(DEFAULTS)) {
-    opts[key] = storage[key] !== undefined ? storage[key] : def;
+    opts[key] = storage[key] !== undefined ? storage[key] : def
   }
 
   // Build groups lookup map
-  const groups = {};
-  rawGroups.forEach((g) => { groups[g.id] = g; });
+  const groups = {}
+  rawGroups.forEach((g) => {
+    groups[g.id] = g
+  })
 
-  const now = Date.now();
-  const warnMs = opts.opt_warn_days * 24 * 60 * 60 * 1000;
+  const now = Date.now()
+  const warnMs = opts.opt_warn_days * 24 * 60 * 60 * 1000
 
   // Build tab data array
   const tabData = tabs.map((tab) => {
-    const key = `${tab.id}_${tab.url}`;
-    const timestamp = storage[key] ?? null;
-    const hasTimestamp = timestamp !== null;
-    const title = tab.title || "Untitled";
-    const hostname = getHostname(tab.url || "");
-    const group = (opts.opt_groups && tab.groupId > 0) ? groups[tab.groupId] ?? null : null;
-    const isStale = opts.opt_warn && hasTimestamp && (now - timestamp) > warnMs;
+    const key = `${tab.id}_${tab.url}`
+    const timestamp = storage[key] ?? null
+    const hasTimestamp = timestamp !== null
+    const title = tab.title || 'Untitled'
+    const hostname = getHostname(tab.url || '')
+    const group =
+      opts.opt_groups && tab.groupId > 0 ? (groups[tab.groupId] ?? null) : null
+    const isStale = opts.opt_warn && hasTimestamp && now - timestamp > warnMs
 
-    const visits = storage[`v:${tab.url}`]?.count || 0;
+    const visits = storage[`v:${tab.url}`]?.count || 0
 
     return {
       tabId: tab.id,
@@ -287,83 +329,132 @@ async function init() {
       group,
       isStale,
       favIconUrl: tab.favIconUrl || null,
-    };
-  });
+    }
+  })
 
-  let currentSort = "duration";
-  let currentDir = "desc";
-  let currentQuery = "";
+  let currentSort = 'duration'
+  let currentDir = 'desc'
+  let currentQuery = ''
 
-  renderTabs(tabData, currentSort, currentDir, currentQuery);
-  updateColHeaders(currentSort, currentDir);
-  startTicker();
+  renderTabs(tabData, currentSort, currentDir, currentQuery)
+  updateColHeaders(currentSort, currentDir)
+  startTicker()
 
-  const search = document.getElementById("search");
+  const search = document.getElementById('search')
 
-  search.addEventListener("input", () => {
-    currentQuery = search.value.trim().toLowerCase();
-    renderTabs(tabData, currentSort, currentDir, currentQuery);
-  });
+  search.addEventListener('input', () => {
+    currentQuery = search.value.trim().toLowerCase()
+    renderTabs(tabData, currentSort, currentDir, currentQuery)
+  })
 
-  search.addEventListener("keydown", (e) => {
-    const items = getVisibleItems();
+  search.addEventListener('keydown', (e) => {
+    const items = getVisibleItems()
 
     switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setFocus(focusedIndex < 0 ? 0 : focusedIndex + 1);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setFocus(focusedIndex <= 0 ? 0 : focusedIndex - 1);
-        break;
-      case "Enter":
+      case 'ArrowDown':
+        e.preventDefault()
+        setFocus(focusedIndex < 0 ? 0 : focusedIndex + 1)
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setFocus(focusedIndex <= 0 ? 0 : focusedIndex - 1)
+        break
+      case 'Enter':
         if (focusedIndex >= 0) {
-          e.preventDefault();
-          items[focusedIndex]?.click();
+          e.preventDefault()
+          items[focusedIndex]?.click()
         }
-        break;
-      case "Escape":
-        window.close();
-        break;
+        break
+      case 'Escape':
+        window.close()
+        break
       default: {
-        const num = parseInt(e.key, 10);
-        if (num >= 1 && num <= 5 && search.value === "") {
-          e.preventDefault();
-          items[num - 1]?.click();
+        const num = parseInt(e.key, 10)
+        if (num >= 1 && num <= 5 && search.value === '') {
+          e.preventDefault()
+          items[num - 1]?.click()
         }
       }
     }
-  });
+  })
 
-  search.focus();
+  search.focus()
 
   // Live option sync — pick up changes saved in the options page
   chrome.storage.onChanged.addListener((changes) => {
-    let needsRender = false;
+    let needsRender = false
     for (const [key, { newValue }] of Object.entries(changes)) {
-      if (key === "theme") { applyTheme(newValue === "light"); continue; }
-      if (!(key in opts)) continue;
-      opts[key] = newValue;
-      if (key === "opt_refresh" || key === "opt_refresh_interval") startTicker();
-      else needsRender = true;
-    }
-    if (needsRender) renderTabs(tabData, currentSort, currentDir, currentQuery);
-  });
-
-  document.querySelectorAll(".col-hd").forEach((col) => {
-    col.addEventListener("click", () => {
-      const field = col.dataset.sort;
-      if (field === currentSort) {
-        currentDir = currentDir === "asc" ? "desc" : "asc";
-      } else {
-        currentSort = field;
-        currentDir = field === "duration" ? "desc" : "asc";
+      if (key === 'theme') {
+        applyTheme(newValue === 'light')
+        continue
       }
-      updateColHeaders(currentSort, currentDir);
-      renderTabs(tabData, currentSort, currentDir, currentQuery);
-    });
-  });
+      if (!(key in opts)) continue
+      opts[key] = newValue
+      if (key === 'opt_refresh' || key === 'opt_refresh_interval') startTicker()
+      else needsRender = true
+    }
+    if (needsRender) renderTabs(tabData, currentSort, currentDir, currentQuery)
+  })
+
+  document.querySelectorAll('.col-hd').forEach((col) => {
+    col.addEventListener('click', () => {
+      const field = col.dataset.sort
+      if (field === currentSort) {
+        currentDir = currentDir === 'asc' ? 'desc' : 'asc'
+      } else {
+        currentSort = field
+        currentDir = field === 'duration' ? 'desc' : 'asc'
+      }
+      updateColHeaders(currentSort, currentDir)
+      renderTabs(tabData, currentSort, currentDir, currentQuery)
+    })
+  })
+}
+
+init()dow.close();
+				break;
+			default: {
+				const num = Number.parseInt(e.key, 10);
+				if (num >= 1 && num <= 5 && search.value === "") {
+					e.preventDefault();
+					items[num - 1]?.click();
+				}
+			}
+		}
+	});
+
+	search.focus();
+
+	// Live option sync — pick up changes saved in the options page
+	chrome.storage.onChanged.addListener((changes) => {
+		let needsRender = false;
+		for (const [key, { newValue }] of Object.entries(changes)) {
+			if (key === "theme") {
+				applyTheme(newValue === "light");
+				continue;
+			}
+			if (!(key in opts)) continue;
+			opts[key] = newValue;
+			if (key === "opt_refresh" || key === "opt_refresh_interval")
+				startTicker();
+			else needsRender = true;
+		}
+		if (needsRender) renderTabs(tabData, currentSort, currentDir, currentQuery);
+	});
+
+	document.querySelectorAll(".col-hd").forEach((col) => {
+		col.addEventListener("click", () => {
+			const field = col.dataset.sort;
+			if (field === currentSort) {
+				currentDir = currentDir === "asc" ? "desc" : "asc";
+			} else {
+				currentSort = field;
+				currentDir = field === "duration" ? "desc" : "asc";
+			}
+			updateColHeaders(currentSort, currentDir);
+			renderTabs(tabData, currentSort, currentDir, currentQuery);
+		});
+	});
 }
 
 init();

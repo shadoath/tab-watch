@@ -7,6 +7,7 @@
 ## Features
 
 ### Core
+
 - **Time per tab** — tracks how long each tab has been open, persisted across browser sessions
 - **Sort by duration or title** — click column headers to toggle sort direction (↑ ↓)
 - **Search** — filter tabs by title or URL instantly
@@ -18,6 +19,7 @@
 ![TabWatch popup](assets/popup-v1.1.0.png)
 
 ### Settings
+
 All configurable via the ⚙ settings page:
 
 - **Badge count** — shows the number of open tabs on the extension icon
@@ -30,11 +32,12 @@ All configurable via the ⚙ settings page:
 ![TabWatch settings](assets/settings-1.1.0.png)
 
 ### Keyboard shortcuts
-| Key | Action |
-|---|---|
-| `↓` / `↑` | Move focus through the tab list |
-| `Enter` | Jump to the focused tab |
-| `Escape` | Close the popup |
+
+| Key       | Action                                                |
+| --------- | ----------------------------------------------------- |
+| `↓` / `↑` | Move focus through the tab list                       |
+| `Enter`   | Jump to the focused tab                               |
+| `Escape`  | Close the popup                                       |
 | `1` – `5` | Jump directly to that row (only when search is empty) |
 
 ---
@@ -42,6 +45,7 @@ All configurable via the ⚙ settings page:
 ## Install
 
 ### Chrome Web Store
+
 [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/pgjiceamhhcdccdoaiggbfjmmllbhmah)
 
 ### Load from source
@@ -52,7 +56,7 @@ All configurable via the ⚙ settings page:
    ```
 2. Open Chrome and go to `chrome://extensions`
 3. Enable **Developer mode** (toggle in the top-right)
-4. Click **Load unpacked** and select the `tab-timer` folder
+4. Click **Load unpacked** and select the `tab-watch` folder
 
 ---
 
@@ -71,18 +75,18 @@ All data is stored locally in your browser. Nothing is ever sent anywhere.
 
 ## Permissions
 
-| Permission | Why |
-|---|---|
-| `tabs` | Read tab titles, URLs, favicons, and close tabs |
-| `storage` | Persist timestamps and preferences locally |
-| `windows` | Focus the correct window when jumping to a tab |
-| `tabGroups` | Read Chrome tab group names and colors |
+| Permission  | Why                                             |
+| ----------- | ----------------------------------------------- |
+| `tabs`      | Read tab titles, URLs, favicons, and close tabs |
+| `storage`   | Persist timestamps and preferences locally      |
+| `windows`   | Focus the correct window when jumping to a tab  |
+| `tabGroups` | Read Chrome tab group names and colors          |
 
 ---
 
 ## Why this exists
 
-I built this because I'm a habitual tab hoarder — tabs I open with the intention of reading, acting on, or coming back to just... sit there. Days turn into weeks. TabWatch makes the problem visible: when you can see that a tab has been open for 12 days, it's a lot harder to ignore. The tab limit warning dims the worst offenders so they stand out immediately. Open it, deal with it, close it.
+I built this because I'm a habitual tab hoarder — tabs I open with the intention of reading, acting on, or coming back to just... sit there. Days turn into weeks. TabWatch makes the problem visible: when you can see that a tab has been open for 42 days, it's a lot harder to ignore. The tab limit warning dims the worst offenders so they stand out immediately. Open it, deal with it, close it.
 
 ---
 

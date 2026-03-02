@@ -5,7 +5,7 @@ Instructions for Claude Code when working on this project.
 ## Project Structure
 
 ```
-tab-timer/
+tab-watch/
 ├── manifest.json       # Extension manifest (MV3)
 ├── background.js       # Service worker — tracks tab open timestamps
 ├── defaults.js         # Shared DEFAULTS object (loaded by popup.html + options.html)
@@ -36,13 +36,13 @@ tab-timer/
 
 `chrome.storage.local` keys:
 
-| Key | Value | Set by | Lifetime |
-|---|---|---|---|
-| `{tabId}_{url}` | `timestamp (ms)` | `background.js` on `tabs.onUpdated` | Deleted when tab closes or navigates away |
-| `_tab_{tabId}` | current URL string | `background.js` on `tabs.onUpdated` | Index for O(1) lookups; deleted when tab closes |
-| `v:{url}` | `{count, ts}` | `background.js` on `tabs.onActivated` | Persists; evicted after 90 days unseen or when > 1000 entries |
-| `theme` | `"light"` or `"dark"` | `popup.js` / `options.js` | Permanent |
-| `opt_*` | option values | `options.js` | Permanent |
+| Key             | Value                 | Set by                                | Lifetime                                                      |
+| --------------- | --------------------- | ------------------------------------- | ------------------------------------------------------------- |
+| `{tabId}_{url}` | `timestamp (ms)`      | `background.js` on `tabs.onUpdated`   | Deleted when tab closes or navigates away                     |
+| `_tab_{tabId}`  | current URL string    | `background.js` on `tabs.onUpdated`   | Index for O(1) lookups; deleted when tab closes               |
+| `v:{url}`       | `{count, ts}`         | `background.js` on `tabs.onActivated` | Persists; evicted after 90 days unseen or when > 1000 entries |
+| `theme`         | `"light"` or `"dark"` | `popup.js` / `options.js`             | Permanent                                                     |
+| `opt_*`         | option values         | `options.js`                          | Permanent                                                     |
 
 ## Icons
 
@@ -58,16 +58,17 @@ Requires `rsvg-convert` (`brew install librsvg`).
 
 ## Color Palette
 
-| Token | Dark | Light |
-|---|---|---|
-| `--accent` | `#1a6bff` | `#1a6bff` |
-| `--bg` | `#0d1117` | `#f0f4ff` |
-| `--border` | `#1a2235` | `#d0daf5` |
+| Token          | Dark      | Light     |
+| -------------- | --------- | --------- |
+| `--accent`     | `#1a6bff` | `#1a6bff` |
+| `--bg`         | `#0d1117` | `#f0f4ff` |
+| `--border`     | `#1a2235` | `#d0daf5` |
 | `--text-title` | `#ccd6f6` | `#1a2455` |
 
 ## Permissions
 
 Only request what is used. Current permissions and their purpose:
+
 - `tabs` — query tab titles, URLs, favicons
 - `storage` — persist timestamps + theme preference
 - `windows` — focus the correct window on tab click
