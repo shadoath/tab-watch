@@ -11,6 +11,15 @@ const GROUP_COLORS = {
   orange: "#e8710a",
 };
 
+// Duration text color scaled to the user's warn threshold
+function getAgeColor(timestamp, warnDays) {
+  const ratio = (Date.now() - timestamp) / (warnDays * 86400000);
+  if (ratio < 0.25) return "var(--accent)"; // fresh
+  if (ratio < 0.50) return "#facc15";       // quarter way — yellow
+  if (ratio < 1.00) return "#f97316";       // halfway to stale — orange
+  return "#ef4444";                         // at/past threshold — red
+}
+
 // Options loaded once per popup open — used by renderTabs via closure
 let opts = {};
 
@@ -23,8 +32,10 @@ let cachedItems = [];
 
 function tick() {
   const now = Date.now();
+  const warnDays = opts.opt_warn_days;
   durationEls.forEach(({ el, timestamp }) => {
     el.textContent = formatDuration(now - timestamp);
+    el.style.color = getAgeColor(timestamp, warnDays);
   });
 }
 
@@ -193,7 +204,9 @@ function renderTabs(tabData, sortBy, dir, query) {
     list.appendChild(item);
 
     if (hasTimestamp) {
-      durationEls.set(tabId, { el: item.querySelector(".tab-duration"), timestamp });
+      const durationEl = item.querySelector(".tab-duration");
+      durationEl.style.color = getAgeColor(timestamp, opts.opt_warn_days);
+      durationEls.set(tabId, { el: durationEl, timestamp });
     }
   });
 
@@ -209,12 +222,20 @@ function escapeHtml(str) {
 }
 
 async function init() {
-  // Fetch tabs, storage, and tab groups in parallel
-  const [tabs, storage, rawGroups] = await Promise.all([
+  // Fetch tabs and tab groups first, then build exact storage keys to read
+  const [tabs, rawGroups] = await Promise.all([
     chrome.tabs.query({}),
-    new Promise((resolve) => chrome.storage.local.get(null, resolve)),
     chrome.tabGroups ? chrome.tabGroups.query({}) : Promise.resolve([]),
   ]);
+
+  const urlTabs = tabs.filter((t) => t.url);
+  const tsKeys    = urlTabs.map((t) => `${t.id}_${t.url}`);
+  const visitKeys = [...new Set(urlTabs.map((t) => `v:${t.url}`))];
+  const metaKeys  = [...Object.keys(DEFAULTS), "theme"];
+
+  const storage = await new Promise((resolve) =>
+    chrome.storage.local.get([...tsKeys, ...visitKeys, ...metaKeys], resolve)
+  );
 
   // Apply theme
   applyTheme(storage.theme === "light");
@@ -252,7 +273,7 @@ async function init() {
     const group = (opts.opt_groups && tab.groupId > 0) ? groups[tab.groupId] ?? null : null;
     const isStale = opts.opt_warn && hasTimestamp && (now - timestamp) > warnMs;
 
-    const visits = storage[`v:${tab.url}`] || 0;
+    const visits = storage[`v:${tab.url}`]?.count || 0;
 
     return {
       tabId: tab.id,

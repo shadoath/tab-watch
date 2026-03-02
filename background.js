@@ -27,11 +27,32 @@ chrome.runtime.onStartup.addListener(async () => {
     chrome.storage.local.get(null),
   ]);
   const activeIds = new Set(tabs.map((t) => String(t.id)));
-  const keysToRemove = Object.keys(items).filter((k) => {
-    const match = k.match(/^(\d+)_/);
-    return match && !activeIds.has(match[1]);
+
+  // Remove timestamp and index keys for tabs that no longer exist
+  const deadTabKeys = Object.keys(items).filter((k) => {
+    const tsMatch  = k.match(/^(\d+)_/);
+    const idxMatch = k.match(/^_tab_(\d+)$/);
+    return (tsMatch && !activeIds.has(tsMatch[1])) ||
+           (idxMatch && !activeIds.has(idxMatch[1]));
   });
-  if (keysToRemove.length > 0) chrome.storage.local.remove(keysToRemove);
+
+  // Evict visit entries unseen for 90 days; cap total at 1000 entries
+  const VISIT_TTL = 90 * 86400000;
+  const VISIT_MAX = 1000;
+  const visitEntries = Object.entries(items)
+    .filter(([k]) => k.startsWith("v:"))
+    .map(([k, v]) => ({ key: k, ts: v?.ts || 0 }));
+
+  const staleVisitKeys = visitEntries
+    .filter((e) => e.ts > 0 && Date.now() - e.ts > VISIT_TTL)
+    .map((e) => e.key);
+
+  const capVisitKeys = visitEntries.length > VISIT_MAX
+    ? visitEntries.sort((a, b) => b.ts - a.ts).slice(VISIT_MAX).map((e) => e.key)
+    : [];
+
+  const allKeysToRemove = [...new Set([...deadTabKeys, ...staleVisitKeys, ...capVisitKeys])];
+  if (allKeysToRemove.length > 0) chrome.storage.local.remove(allKeysToRemove);
 });
 
 chrome.storage.onChanged.addListener((changes) => {
@@ -46,7 +67,8 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
     if (!tab.url) return;
     const key = `v:${tab.url}`;
     const storage = await chrome.storage.local.get(key);
-    chrome.storage.local.set({ [key]: (storage[key] || 0) + 1 });
+    const count = storage[key]?.count || 0;
+    chrome.storage.local.set({ [key]: { count: count + 1, ts: Date.now() } });
   } catch {
     // Tab may have been closed before we could read it
   }
@@ -57,23 +79,27 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete" || !tab.url) return;
 
-  const newKey = `${tabId}_${tab.url}`;
+  const newKey   = `${tabId}_${tab.url}`;
+  const indexKey = `_tab_${tabId}`;
 
-  // Single read: clean up stale keys and write timestamp if not already set
-  chrome.storage.local.get(null, (items) => {
-    const staleKeys = Object.keys(items).filter(
-      (k) => k.startsWith(`${tabId}_`) && k !== newKey
-    );
-    if (staleKeys.length > 0) chrome.storage.local.remove(staleKeys);
-    if (!items[newKey]) chrome.storage.local.set({ [newKey]: Date.now() });
+  // Read only the two keys we need — index + new timestamp key
+  chrome.storage.local.get([indexKey, newKey], (items) => {
+    const writes = {};
+    const oldUrl = items[indexKey];
+    if (oldUrl && oldUrl !== tab.url) chrome.storage.local.remove(`${tabId}_${oldUrl}`);
+    writes[indexKey] = tab.url;
+    if (!items[newKey]) writes[newKey] = Date.now();
+    chrome.storage.local.set(writes);
   });
 });
 
 // ── Cleanup on tab close ──────────────────────────────────────────────────────
 
 chrome.tabs.onRemoved.addListener((tabId) => {
-  chrome.storage.local.get(null, (items) => {
-    const keysToRemove = Object.keys(items).filter((k) => k.startsWith(`${tabId}_`));
-    if (keysToRemove.length > 0) chrome.storage.local.remove(keysToRemove);
+  const indexKey = `_tab_${tabId}`;
+  chrome.storage.local.get(indexKey, (items) => {
+    const keysToRemove = [indexKey];
+    if (items[indexKey]) keysToRemove.push(`${tabId}_${items[indexKey]}`);
+    chrome.storage.local.remove(keysToRemove);
   });
 });

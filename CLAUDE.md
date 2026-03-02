@@ -39,7 +39,8 @@ tab-timer/
 | Key | Value | Set by | Lifetime |
 |---|---|---|---|
 | `{tabId}_{url}` | `timestamp (ms)` | `background.js` on `tabs.onUpdated` | Deleted when tab closes or navigates away |
-| `v:{url}` | visit count | `background.js` on `tabs.onActivated` | Persists across tab close/reopen |
+| `_tab_{tabId}` | current URL string | `background.js` on `tabs.onUpdated` | Index for O(1) lookups; deleted when tab closes |
+| `v:{url}` | `{count, ts}` | `background.js` on `tabs.onActivated` | Persists; evicted after 90 days unseen or when > 1000 entries |
 | `theme` | `"light"` or `"dark"` | `popup.js` / `options.js` | Permanent |
 | `opt_*` | option values | `options.js` | Permanent |
 

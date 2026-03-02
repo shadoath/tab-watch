@@ -2,8 +2,6 @@
 
 > See how long every browser tab has been open — search, sort, jump to or close any tab without leaving the popup.
 
-![TabWatch popup](assets/popup-v1.1.0.png)
-
 ---
 
 ## Features
@@ -16,6 +14,8 @@
 - **Close tab** — hover a row to reveal an × button; closes the tab without switching to it
 - **Visit counter** — tracks how many times you've activated each tab; persists even after the tab is closed and reopened
 - **Dark / light mode** — toggle in the toolbar or settings, preference saved automatically
+
+![TabWatch popup](assets/popup-v1.1.0.png)
 
 ### Settings
 All configurable via the ⚙ settings page:
