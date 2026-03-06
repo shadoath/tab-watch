@@ -48,6 +48,10 @@ All configurable via the ⚙ settings page:
 
 [Install from the Chrome Web Store](https://chromewebstore.google.com/detail/pgjiceamhhcdccdoaiggbfjmmllbhmah)
 
+### Firefox Add-ons
+
+[Install from Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/tabwatch/)
+
 ### Load from source
 
 1. Clone the repo:
