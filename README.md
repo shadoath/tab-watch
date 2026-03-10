@@ -97,3 +97,7 @@ I built this because I'm a habitual tab hoarder — tabs I open with the intenti
 ## License
 
 [MIT](LICENSE)
+
+---
+
+A [Whiteboard Works](https://whiteboardworks.com) project.
