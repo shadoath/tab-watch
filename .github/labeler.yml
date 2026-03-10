@@ -1,0 +1,8 @@
+documentation:
+  - any: ["**/*.md"]
+feature:
+  - head-branch: ["/feat/"]
+bugfix:
+  - head-branch: ["/fix/"]
+chore:
+  - head-branch: ["/chore/"]

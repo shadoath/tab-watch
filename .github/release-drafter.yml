@@ -1,0 +1,27 @@
+commitish: "develop"
+category-template: "$TITLE"
+categories:
+  - title: "New Features"
+    labels:
+      - "feature"
+  - title: "Enhancements"
+    labels:
+      - "enhancement"
+      - "design"
+  - title: "Bug Fixes"
+    labels:
+      - "bugfix"
+  - title: "Maintenance"
+    labels:
+      - "tests"
+      - "refactor"
+      - "chore"
+  - title: "Documentation"
+    labels:
+      - "documentation"
+exclude-labels:
+  - "skip-changelog"
+template: |
+  ## Changes
+
+  $CHANGES
